@@ -97,14 +97,14 @@ describe("Seed Integrity", () => {
     ]);
   });
 
-  test("should create exactly 3 clinics", () => {
+  test("should create exactly 4 clinics", () => {
     const clinicCreates = createCalls.filter((c) => c.model === "clinic");
-    expect(clinicCreates).toHaveLength(3);
+    expect(clinicCreates).toHaveLength(4);
   });
 
-  test("should create exactly 3 users", () => {
+  test("should create exactly 4 users", () => {
     const userCreates = createCalls.filter((c) => c.model === "user");
-    expect(userCreates).toHaveLength(3);
+    expect(userCreates).toHaveLength(4);
   });
 
   test("should create exactly 2 patients", () => {

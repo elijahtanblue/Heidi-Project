@@ -29,6 +29,10 @@ async function main() {
     data: { name: "Summit Rehabilitation", optedIn: true, accessPercent: 50, lastDecayAt: new Date() },
   });
 
+  const clinicD = await prisma.clinic.create({
+    data: { name: "Sue May Physio Clinic", optedIn: true, accessPercent: 0, lastDecayAt: new Date() },
+  });
+
   // Create 3 users (one per clinic)
   const passwordHash = await hash("password123", 12);
 
@@ -83,7 +87,17 @@ async function main() {
     },
   });
 
-  console.log("Seed completed: 3 clinics, 3 users, 2 patients.");
+  await prisma.user.create({
+    data: {
+      email: "coachsuemay@phyio.com",
+      password: passwordHash,
+      name: "Sue May",
+      role: "clinician",
+      clinicId: clinicD.id,
+    },
+  });
+
+  console.log("Seed completed: 4 clinics, 4 users, 2 patients.");
 }
 
 main()

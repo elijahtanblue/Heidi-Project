@@ -300,7 +300,29 @@ function EditUpdateInline({
     update.dateOfVisit ? update.dateOfVisit.slice(0, 10) : ""
   );
   const [saving, setSaving] = useState(false);
+  const [categorisingTx, setCategorisingTx] = useState(false);
   const [error, setError] = useState("");
+
+  async function handleTreatmentBlur() {
+    const text = treatmentModalities.trim();
+    if (text.length < 3) return;
+    setCategorisingTx(true);
+    try {
+      const res = await fetch("/api/updates/categorise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTreatmentModalities(data.rewritten);
+      }
+    } catch {
+      // keep original on error
+    } finally {
+      setCategorisingTx(false);
+    }
+  }
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -357,9 +379,12 @@ function EditUpdateInline({
         type="text"
         value={treatmentModalities}
         onChange={(e) => setTreatmentModalities(e.target.value)}
-        placeholder="Treatment Modalities"
-        className={inputClass}
+        onBlur={handleTreatmentBlur}
+        disabled={categorisingTx}
+        placeholder={categorisingTx ? "Categorising…" : "Treatment Modalities"}
+        className={inputClass + (categorisingTx ? " opacity-50 bg-gray-50" : "")}
         aria-label="Treatment Modalities"
+        data-testid={`treatment-edit-input-${update.id}`}
       />
       <input
         type="date"

@@ -31,7 +31,29 @@ export default function AddUpdateForm({
   // (notes state removed — QH now uses notesRaw like STRUCTURED)
 
   const [loading, setLoading] = useState(false);
+  const [categorisingTx, setCategorisingTx] = useState(false);
   const [error, setError] = useState("");
+
+  async function handleTreatmentBlur() {
+    const text = treatmentModalities.trim();
+    if (text.length < 3) return;
+    setCategorisingTx(true);
+    try {
+      const res = await fetch("/api/updates/categorise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTreatmentModalities(data.rewritten);
+      }
+    } catch {
+      // keep original on error
+    } finally {
+      setCategorisingTx(false);
+    }
+  }
 
   function resetForm() {
     setPainRegion("");
@@ -212,9 +234,12 @@ export default function AddUpdateForm({
                 type="text"
                 value={treatmentModalities}
                 onChange={(e) => setTreatmentModalities(e.target.value)}
+                onBlur={handleTreatmentBlur}
+                disabled={categorisingTx}
                 required
-                placeholder="e.g. Manual therapy, exercise prescription"
-                className={inputClass}
+                placeholder={categorisingTx ? "Categorising…" : "e.g. strengthening exercises for the knee"}
+                className={inputClass + (categorisingTx ? " opacity-50 bg-gray-50" : "")}
+                data-testid={`treatment-modalities-input-${episodeId}`}
               />
             </div>
 
@@ -300,9 +325,12 @@ export default function AddUpdateForm({
                 type="text"
                 value={treatmentModalities}
                 onChange={(e) => setTreatmentModalities(e.target.value)}
+                onBlur={handleTreatmentBlur}
+                disabled={categorisingTx}
                 required
-                placeholder="e.g. Manual therapy, exercise prescription"
-                className={inputClass}
+                placeholder={categorisingTx ? "Categorising…" : "e.g. strengthening exercises for the knee"}
+                className={inputClass + (categorisingTx ? " opacity-50 bg-gray-50" : "")}
+                data-testid={`treatment-modalities-input-${episodeId}`}
               />
             </div>
 
