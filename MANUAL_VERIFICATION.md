@@ -21,18 +21,19 @@
 ### Dashboard (Clinician View)
 - [ ] Dashboard shows "Shared Patient History" heading
 - [ ] Dashboard shows gold "Contribute Updates to Unlock Patient History" banner
-- [ ] Dashboard shows a "Clinics" table with 3 rows
+- [ ] Dashboard shows a "Clinics" table with 4 rows
 - [ ] Each clinic row shows the clinic name and opt-in status badge
 - [ ] "City Physio" shows "Opted In" (green badge) with toggle (own clinic)
 - [ ] "Harbour Health" shows "Not Opted In" (gray badge, no toggle — not own clinic)
 - [ ] "Summit Rehabilitation" shows "Opted In" (green badge, no toggle — not own clinic)
+- [ ] "Sue May Physio Clinic" shows "Opted In" (green badge, no toggle — not own clinic)
 - [ ] Navbar shows "Kinetic" logo and "Dashboard" link (active/highlighted)
 - [ ] "Sign out" is a gold button in the navbar — clicking it clears session and redirects to login page
 
 ### Data Persistence
 - [ ] After login + viewing dashboard, stop the dev server (`Ctrl+C`)
 - [ ] Restart the dev server (`npm run dev`)
-- [ ] Navigate to dashboard — data still shows 3 clinics with correct opt-in status
+- [ ] Navigate to dashboard — data still shows 4 clinics with correct opt-in status
 
 ---
 
@@ -47,7 +48,7 @@
 
 ### Admin Toggle (All Clinics)
 - [ ] Log in as `elijah@admin.com` (admin)
-- [ ] Toggle switches visible on ALL 3 clinics
+- [ ] Toggle switches visible on ALL 4 clinics
 - [ ] Can toggle any clinic's opt-in status
 
 ### Authorization
@@ -205,6 +206,6 @@
 ## Seed Data Reference
 | Entity  | Count | Details |
 |---------|-------|---------|
-| Clinics | 3     | City Physio (opted in), Harbour Health (not opted in), Summit Rehabilitation (opted in) |
-| Users   | 3     | edsun@diversus.com (clinician, City Physio), edzhang@diversus.com (clinician, Harbour Health), elijah@admin.com (admin, Summit Rehabilitation) — all password: `password123` |
+| Clinics | 4     | City Physio (opted in), Harbour Health (not opted in), Summit Rehabilitation (opted in), Sue May Physio Clinic (opted in) |
+| Users   | 4     | edsun@diversus.com (clinician, City Physio), edzhang@diversus.com (clinician, Harbour Health), elijah@admin.com (admin, Summit Rehabilitation), coachsuemay@physio.com (clinician, Sue May Physio Clinic) — all password: `password123` |
 | Patients| 2     | John Smith (DOB 1985-03-15), Winston Liang (DOB 1990-07-22) — both visible to all clinicians |
