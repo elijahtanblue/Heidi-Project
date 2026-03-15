@@ -93,4 +93,15 @@ describe("PatientPresentForm", () => {
       expect(screen.getByText(/something went wrong/i)).toBeInTheDocument();
     });
   });
+
+  test("shows network error message when fetch throws", async () => {
+    (global.fetch as jest.Mock).mockRejectedValueOnce(new Error("Network failure"));
+
+    render(<PatientPresentForm />);
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
+    });
+  });
 });
