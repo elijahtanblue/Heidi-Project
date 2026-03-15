@@ -26,6 +26,9 @@ interface ClinicalUpdate {
   notesSummary?: string | null;
   dateOfVisit?: string | null;
   createdAt: string;
+  patientSubmitted?: boolean;
+  submittingClinicName?: string | null;
+  submittingCarerName?: string | null;
 }
 
 interface Episode {
@@ -222,6 +225,13 @@ export default function EpisodesSection({
                             <p className="text-[var(--kinetic-gray)] mt-0.5 italic">
                               {update.notes}
                             </p>
+                          )}
+                          {update.patientSubmitted && (update.submittingClinicName || update.submittingCarerName) && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              {update.submittingClinicName && <span>{update.submittingClinicName}</span>}
+                              {update.submittingClinicName && update.submittingCarerName && <span> · </span>}
+                              {update.submittingCarerName && <span>{update.submittingCarerName}</span>}
+                            </div>
                           )}
                           <div className="flex items-center gap-2 mt-1.5">
                             <button

@@ -10,6 +10,7 @@ const mockPush = jest.fn();
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 
 import PatientPresentForm from "@/components/PatientPresentForm";
+import EpisodesSection from "@/components/EpisodesSection";
 
 describe("PatientPresentForm", () => {
   beforeEach(() => {
@@ -103,5 +104,46 @@ describe("PatientPresentForm", () => {
     await waitFor(() => {
       expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
+  });
+});
+
+describe("EpisodesSection — patient-submitted display", () => {
+  test("shows submittingClinicName and submittingCarerName for patient-submitted updates", () => {
+    const episodes = [
+      {
+        id: "ep1",
+        patientId: "p1",
+        reason: "Patient-presented consultation",
+        startDate: "2026-03-15T00:00:00.000Z",
+        createdAt: "2026-03-15T00:00:00.000Z",
+        patient: { firstName: "John", lastName: "Smith" },
+        clinicalUpdates: [
+          {
+            id: "upd1",
+            painRegion: "Lower back",
+            diagnosis: "Lumbar strain",
+            treatmentModalities: "Exercise therapy",
+            redFlags: false,
+            notes: "",
+            updateType: "STRUCTURED",
+            dateOfVisit: "2026-03-15T00:00:00.000Z",
+            createdAt: "2026-03-15T00:00:00.000Z",
+            patientSubmitted: true,
+            submittingClinicName: "City Physio",
+            submittingCarerName: "Dr. Jane",
+          },
+        ],
+      },
+    ];
+
+    render(
+      <EpisodesSection
+        initialEpisodes={episodes as never}
+        patients={[{ id: "p1", firstName: "John", lastName: "Smith" }]}
+      />
+    );
+
+    expect(screen.getByText("City Physio")).toBeInTheDocument();
+    expect(screen.getByText("Dr. Jane")).toBeInTheDocument();
   });
 });
