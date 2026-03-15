@@ -73,6 +73,24 @@ export async function GET() {
 
   const user = session.user as unknown as Record<string, unknown>;
 
+  // Patient role: return only this patient's episodes
+  if (user.role === "patient") {
+    const patientRecordId = user.patientRecordId as string | null;
+    if (!patientRecordId) {
+      return NextResponse.json({ error: "No patient record linked" }, { status: 400 });
+    }
+    const episodes = await prisma.episode.findMany({
+      where: { patientId: patientRecordId },
+      include: {
+        patient: { select: { firstName: true, lastName: true } },
+        clinicalUpdates: { orderBy: { createdAt: "desc" } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(episodes);
+  }
+
+  // Clinician/admin role: return clinic's episodes (existing behaviour)
   const episodes = await prisma.episode.findMany({
     where: { clinicId: user.clinicId as string },
     include: {

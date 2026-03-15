@@ -7,6 +7,7 @@
 
 const mockPatientFindUnique = jest.fn();
 const mockEpisodeCreate = jest.fn();
+const mockEpisodeFindMany = jest.fn();
 const mockEventCreate = jest.fn(async () => ({}));
 
 jest.mock("@prisma/adapter-neon", () => ({
@@ -16,7 +17,7 @@ jest.mock("@prisma/adapter-neon", () => ({
 jest.mock("@/lib/generated/prisma/client", () => ({
   PrismaClient: jest.fn(() => ({
     patient: { findUnique: mockPatientFindUnique },
-    episode: { create: mockEpisodeCreate },
+    episode: { create: mockEpisodeCreate, findMany: mockEpisodeFindMany },
     simulationEvent: { create: mockEventCreate },
   })),
 }));
@@ -112,5 +113,36 @@ describe("POST /api/episodes - Validation & Persistence", () => {
       makeRequest({ patientId: "p1", reason: "Back pain", startDate: "2026-02-22" })
     );
     expect(res.status).toBe(201);
+  });
+});
+
+describe("GET /api/episodes — patient role", () => {
+  beforeEach(() => {
+    // Override auth mock for these tests
+    (require("@/lib/auth") as { auth: jest.Mock }).auth.mockResolvedValue({
+      user: { id: "u-patient", role: "patient", clinicId: "c1", patientRecordId: "p1" },
+    });
+    mockEpisodeFindMany.mockReset();
+  });
+
+  test("filters episodes by patientId when role is patient", async () => {
+    mockEpisodeFindMany.mockResolvedValue([]);
+    const { GET } = await import("@/app/api/episodes/route");
+    const res = await GET();
+    expect(res.status).toBe(200);
+    expect(mockEpisodeFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({ patientId: "p1" }),
+      })
+    );
+  });
+
+  test("returns 400 when patient has no patientRecordId", async () => {
+    (require("@/lib/auth") as { auth: jest.Mock }).auth.mockResolvedValue({
+      user: { id: "u-patient", role: "patient", clinicId: "c1", patientRecordId: null },
+    });
+    const { GET } = await import("@/app/api/episodes/route");
+    const res = await GET();
+    expect(res.status).toBe(400);
   });
 });
