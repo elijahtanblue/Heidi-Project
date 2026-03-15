@@ -67,13 +67,25 @@ async function main() {
   });
 
   // Create 2 patients
-  await prisma.patient.create({
+  const johnSmith = await prisma.patient.create({
     data: {
       firstName: "John",
       lastName: "Smith",
       dateOfBirth: new Date("1985-03-15"),
       phoneNumber: "0400000001",
       clinicId: clinicA.id,
+    },
+  });
+
+  // Create patient portal user for John Smith
+  await prisma.user.create({
+    data: {
+      email: "johnsmith@patient.com",
+      password: passwordHash,
+      name: "John Smith",
+      role: "patient",
+      clinicId: clinicA.id,
+      patientRecordId: johnSmith.id,
     },
   });
 
@@ -97,7 +109,7 @@ async function main() {
     },
   });
 
-  console.log("Seed completed: 4 clinics, 4 users, 2 patients.");
+  console.log("Seed completed: 4 clinics, 5 users, 2 patients.");
 }
 
 main()

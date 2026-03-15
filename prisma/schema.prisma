@@ -31,9 +31,10 @@ model User {
   password  String
   name      String
   role      String   @default("clinician")
-  clinicId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  clinicId        String
+  patientRecordId String?  @unique    // ← links a User account to a Patient record
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   clinic           Clinic            @relation(fields: [clinicId], references: [id])
   episodes         Episode[]
@@ -89,9 +90,12 @@ model ClinicalUpdate {
   suggestedNextSteps  String?
   notesRaw            String?
   notesSummary        String?
-  dateOfVisit         DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @default(now()) @updatedAt
+  dateOfVisit           DateTime?
+  patientSubmitted      Boolean  @default(false)
+  submittingClinicName  String?
+  submittingCarerName   String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
 
   episode Episode @relation(fields: [episodeId], references: [id])
   clinic  Clinic  @relation(fields: [clinicId], references: [id])

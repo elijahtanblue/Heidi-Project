@@ -41,6 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           role: user.role,
           clinicId: user.clinicId,
           clinicName: user.clinic.name,
+          patientRecordId: user.patientRecordId ?? null,
         };
       },
     }),
@@ -55,6 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = u.role;
         token.clinicId = u.clinicId;
         token.clinicName = u.clinicName;
+        token.patientRecordId = u.patientRecordId ?? null;
       }
       return token;
     },
@@ -65,6 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         u.role = token.role;
         u.clinicId = token.clinicId;
         u.clinicName = token.clinicName;
+        u.patientRecordId = token.patientRecordId;
       }
       return session;
     },

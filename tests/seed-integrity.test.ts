@@ -42,7 +42,9 @@ const mockPrismaClient = {
       deleteCalls.push("patient");
     }),
     create: jest.fn(async ({ data }: { data: Record<string, unknown> }) => {
-      createCalls.push({ model: "patient", data });
+      const patient = { id: `patient-mock-id`, ...data };
+      createCalls.push({ model: "patient", data: patient });
+      return patient;
     }),
   },
   clinicalUpdate: {
@@ -102,9 +104,9 @@ describe("Seed Integrity", () => {
     expect(clinicCreates).toHaveLength(4);
   });
 
-  test("should create exactly 4 users", () => {
+  test("should create exactly 5 users", () => {
     const userCreates = createCalls.filter((c) => c.model === "user");
-    expect(userCreates).toHaveLength(4);
+    expect(userCreates).toHaveLength(5);
   });
 
   test("should create exactly 2 patients", () => {
