@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { determineTier, getTierCapabilities } from "@/domain/policy/access";
@@ -31,6 +32,12 @@ async function getClinics() {
 export default async function DashboardPage() {
   const session = await auth();
   const user = session?.user as unknown as Record<string, unknown>;
+
+  // Redirect patient-role users to their own dashboard
+  if ((user as Record<string, unknown>)?.role === "patient") {
+    redirect("/patient-dashboard");
+  }
+
   const clinicId = user?.clinicId as string;
   const isAdmin = user?.role === "admin";
 
