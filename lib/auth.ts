@@ -67,7 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         u.role = token.role;
         u.clinicId = token.clinicId;
         u.clinicName = token.clinicName;
-        u.patientRecordId = token.patientRecordId;
+        u.patientRecordId = token.patientRecordId ?? null;
       }
       return session;
     },
