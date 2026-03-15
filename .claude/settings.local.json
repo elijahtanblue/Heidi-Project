@@ -3,7 +3,12 @@
     "allow": [
       "Bash(npx create-next-app:*)",
       "Bash(printf:*)",
-      "Bash(npx create-next-app@latest:*)"
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npx prisma:*)",
+      "Bash(grep -n \"Task 2\\\\|task-2\\\\|patientSubmitted\\\\|submittingClinic\\\\|submittingCarer\\\\|transaction\\\\|$transaction\\\\|notesSummary\\\\|generateSummary\\\\|painRegion\\\\|required field\\\\|missing\\\\|validation\" \"D:/Vibe Coded Projects/Heidi Project/docs/superpowers/plans/2026-03-15-patient-portal.md\")",
+      "Bash(ls \"d:/Vibe Coded Projects/Heidi Project/app/\\(routes\\)/\")",
+      "Bash(ls \"d:/Vibe Coded Projects/Heidi Project/app/\\(routes\\)/patient-dashboard/\")",
+      "Bash(ls \"d:/Vibe Coded Projects/Heidi Project/app/\\(routes\\)/patient-dashboard/present/\")"
     ]
   }
 }
