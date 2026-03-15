@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { generateSummary } from "@/domain/services/summarizer";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,8 @@ export async function POST(request: Request) {
     dateOfVisit,
   } = body as Record<string, unknown>;
 
+  const notesSummaryValue = notesRaw ? generateSummary(notesRaw as string) : null;
+
   // Sequential creates — no $transaction needed for demo
   const episode = await prisma.episode.create({
     data: {
@@ -66,8 +69,9 @@ export async function POST(request: Request) {
       diagnosis: (diagnosis as string) || "",
       treatmentModalities: (treatmentModalities as string) || "",
       redFlags: (redFlags as boolean) ?? false,
-      notes: "",
+      notes: notesSummaryValue ?? "",
       notesRaw: (notesRaw as string) || null,
+      notesSummary: notesSummaryValue || null,
       dateOfVisit: dateOfVisit ? new Date(dateOfVisit as string) : null,
       patientSubmitted: true,
       submittingClinicName: (submittingClinicName as string) || null,
