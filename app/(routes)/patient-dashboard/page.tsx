@@ -22,9 +22,9 @@ export default async function PatientDashboardPage() {
       episodes: {
         orderBy: { createdAt: "desc" },
         include: {
+          patient: { select: { firstName: true, lastName: true } },
           clinicalUpdates: {
             orderBy: { createdAt: "desc" },
-            include: { clinic: true, user: true },
           },
         },
       },
@@ -34,6 +34,19 @@ export default async function PatientDashboardPage() {
   if (!patient) redirect("/login");
 
   const patients = [{ id: patient.id, firstName: patient.firstName, lastName: patient.lastName }];
+
+  // Serialize dates for client component
+  const serializedEpisodes = patient.episodes.map((ep) => ({
+    ...ep,
+    startDate: ep.startDate.toISOString(),
+    createdAt: ep.createdAt.toISOString(),
+    clinicalUpdates: ep.clinicalUpdates.map((cu) => ({
+      ...cu,
+      createdAt: cu.createdAt.toISOString(),
+      updatedAt: cu.updatedAt.toISOString(),
+      dateOfVisit: cu.dateOfVisit?.toISOString() ?? null,
+    })),
+  }));
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -53,7 +66,7 @@ export default async function PatientDashboardPage() {
         </Link>
       </div>
 
-      {patient.episodes.length === 0 ? (
+      {serializedEpisodes.length === 0 ? (
         <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <p className="text-sm text-gray-500">
             No treatment history yet. Present your device to your physiotherapist to get started.
@@ -61,7 +74,7 @@ export default async function PatientDashboardPage() {
         </div>
       ) : (
         <EpisodesSection
-          initialEpisodes={patient.episodes as Parameters<typeof EpisodesSection>[0]["initialEpisodes"]}
+          initialEpisodes={serializedEpisodes}
           patients={patients}
         />
       )}
