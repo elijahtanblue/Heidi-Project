@@ -56,7 +56,7 @@ describe("Navbar - Sign-out behavior", () => {
     render(<Navbar />);
     const btn = screen.getByText("Sign out");
     expect(btn.className).toContain("bg-[var(--kinetic-gold)]");
-    expect(btn.className).toContain("text-white");
+    expect(btn.className).toContain("text-[var(--kinetic-dark)]");
   });
 
   test("sign-out calls signOut with redirect: false", async () => {

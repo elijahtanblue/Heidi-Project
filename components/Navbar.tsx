@@ -11,52 +11,72 @@ const allNavLinks = [
 
 interface NavbarProps {
   isAdmin?: boolean;
+  variant?: "clinician" | "patient";
 }
 
-export default function Navbar({ isAdmin = false }: NavbarProps) {
+export default function Navbar({ isAdmin = false, variant = "clinician" }: NavbarProps) {
   const navLinks = allNavLinks.filter((link) => !link.adminOnly || isAdmin);
   const pathname = usePathname();
+  const isPatient = variant === "patient";
+
+  async function handleSignOut() {
+    await signOut({ redirect: false });
+    window.location.href = `${window.location.origin}/login`;
+  }
 
   return (
-    <header className="bg-white border-b border-gray-200">
+    <header
+      className={
+        isPatient
+          ? "bg-[var(--kinetic-bg)] border-b border-[var(--kinetic-maroon)]/20"
+          : "bg-[var(--kinetic-maroon)]"
+      }
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="flex items-center gap-2">
+            <Link href={isPatient ? "/patient-dashboard" : "/dashboard"} className="flex items-center gap-2">
               <div className="w-7 h-7 rounded bg-[var(--kinetic-gold)] flex items-center justify-center">
                 <span className="text-white font-bold text-xs">K</span>
               </div>
-              <span className="font-bold text-lg text-[var(--kinetic-dark)]">
+              <span
+                className={`font-bold text-lg ${
+                  isPatient ? "text-[var(--kinetic-maroon)]" : "text-white"
+                }`}
+              >
                 Kinetic
               </span>
             </Link>
 
-            {/* Nav Links */}
-            <nav className="flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    pathname === link.href
-                      ? "bg-[var(--kinetic-gold-light)] text-[var(--kinetic-dark)]"
-                      : "text-[var(--kinetic-gray)] hover:text-[var(--kinetic-dark)]"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            {/* Nav Links — clinician only */}
+            {!isPatient && (
+              <nav className="flex items-center gap-1">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                      pathname === link.href
+                        ? "bg-[var(--kinetic-maroon-light)] text-white"
+                        : "text-white/70 hover:text-white"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
           </div>
 
           {/* Sign Out */}
           <button
-            onClick={async () => {
-              await signOut({ redirect: false });
-              window.location.href = `${window.location.origin}/login`;
-            }}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
+            onClick={handleSignOut}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              isPatient
+                ? "bg-[var(--kinetic-maroon)] text-white hover:bg-[var(--kinetic-maroon-light)]"
+                : "bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] hover:bg-[var(--kinetic-gold-hover)]"
+            }`}
           >
             Sign out
           </button>
