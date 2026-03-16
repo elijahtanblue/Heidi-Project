@@ -59,7 +59,7 @@ export default function CreateEpisodeForm({
     return (
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--kinetic-gold)] text-white text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
       >
         + Add Patient Visit
       </button>
@@ -67,7 +67,7 @@ export default function CreateEpisodeForm({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
+    <div className="bg-white rounded-lg shadow-sm p-4">
       <h3 className="text-sm font-semibold text-[var(--kinetic-dark)] mb-3">
         Add New Patient Visit
       </h3>
@@ -138,7 +138,7 @@ export default function CreateEpisodeForm({
           <button
             type="submit"
             disabled={loading}
-            className="px-3 py-1.5 bg-[var(--kinetic-gold)] text-white text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
+            className="px-3 py-1.5 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
           >
             {loading ? "Adding..." : "Add Visit"}
           </button>

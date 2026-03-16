@@ -54,9 +54,9 @@ export default function PatientManagement({ patients: initialPatients }: Patient
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6" data-testid="patient-management">
+    <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-6" data-testid="patient-management">
       <div className="px-4 py-3 border-b border-gray-200">
-        <h2 className="text-sm font-semibold text-[var(--kinetic-dark)]">
+        <h2 className="text-sm text-[var(--kinetic-dark)]">
           Patient Management
         </h2>
       </div>

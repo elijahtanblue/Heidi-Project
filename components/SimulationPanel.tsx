@@ -108,8 +108,8 @@ export default function SimulationPanel({ clinics, patients }: Props) {
   return (
     <div className="space-y-6">
       {/* Check Access Section */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Check Access Decision</h2>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h2 className="text-lg text-gray-900 mb-4">Check Access Decision</h2>
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Viewing Clinic</label>
@@ -142,7 +142,7 @@ export default function SimulationPanel({ clinics, patients }: Props) {
           <button
             onClick={handleCheckAccess}
             disabled={!!loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] disabled:opacity-50 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-[var(--kinetic-dark)] bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] disabled:opacity-50 transition-colors"
             data-testid="check-access-btn"
           >
             {loading === "access" ? "Checking..." : "Check Access"}
@@ -188,8 +188,8 @@ export default function SimulationPanel({ clinics, patients }: Props) {
 
       {/* Replay Timeline */}
       {replayResults.length > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Replay Timeline</h2>
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <h2 className="text-lg text-gray-900 mb-4">Replay Timeline</h2>
           <div className="space-y-3 max-h-[360px] overflow-y-auto" data-testid="replay-timeline">
             {replayResults.map((r, i) => (
               <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-md">
@@ -227,9 +227,9 @@ export default function SimulationPanel({ clinics, patients }: Props) {
       )}
 
       {/* Event Log */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Event Log</h2>
+          <h2 className="text-lg text-gray-900">Event Log</h2>
           <button
             onClick={fetchEvents}
             className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"

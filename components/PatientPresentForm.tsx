@@ -76,10 +76,10 @@ export default function PatientPresentForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-4">
       {/* Physio-filled fields */}
       <div className="pb-4 border-b border-gray-100">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3">
+        <p className="text-xs font-medium text-[var(--kinetic-maroon)] uppercase tracking-wide mb-3">
           Physiotherapist fills in below
         </p>
         <div className="space-y-3">
@@ -207,7 +207,7 @@ export default function PatientPresentForm() {
       <button
         type="submit"
         disabled={loading || categorisingTx}
-        className="w-full px-4 py-2 text-sm font-medium text-white bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] disabled:opacity-50 transition-colors"
+        className="w-full px-4 py-2 text-sm font-medium text-[var(--kinetic-dark)] bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] disabled:opacity-50 transition-colors"
       >
         {loading ? "Submitting..." : "Submit"}
       </button>

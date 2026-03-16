@@ -49,7 +49,7 @@ export default function CreatePatientForm() {
       <button
         onClick={() => setIsOpen(true)}
         data-testid="create-patient-btn"
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--kinetic-gold)] text-white text-sm font-medium rounded-md hover:opacity-90 transition-opacity"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
       >
         + Create New Patient
       </button>
@@ -57,7 +57,7 @@ export default function CreatePatientForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4" data-testid="create-patient-form">
+    <div className="bg-white rounded-lg shadow-sm p-4 mb-4" data-testid="create-patient-form">
       <h3 className="text-sm font-semibold text-[var(--kinetic-dark)] mb-3">
         New Patient
       </h3>
@@ -126,7 +126,7 @@ export default function CreatePatientForm() {
           <button
             type="submit"
             disabled={submitting}
-            className="px-3 py-1.5 bg-[var(--kinetic-gold)] text-white text-sm font-medium rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="px-3 py-1.5 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-sm font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
           >
             {submitting ? "Creating..." : "Create Patient"}
           </button>

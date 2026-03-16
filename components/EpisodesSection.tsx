@@ -92,14 +92,14 @@ export default function EpisodesSection({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[var(--kinetic-dark)]">
+        <h2 className="text-sm text-[var(--kinetic-dark)]">
           Patient Visits
         </h2>
         <CreateEpisodeForm patients={patients} onCreated={handleEpisodeCreated} />
       </div>
 
       {episodes.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 px-4 py-6 text-center">
+        <div className="bg-white rounded-lg shadow-sm px-4 py-6 text-center">
           <p className="text-sm text-[var(--kinetic-gray)]">
             No patient visits yet. Add one to start contributing updates.
           </p>
@@ -109,7 +109,7 @@ export default function EpisodesSection({
           {episodes.map((episode) => (
             <div
               key={episode.id}
-              className="bg-white rounded-lg border border-gray-200 p-4"
+              className="bg-white rounded-lg shadow-sm p-4"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -408,7 +408,7 @@ function EditUpdateInline({
         <button
           type="submit"
           disabled={saving}
-          className="px-2 py-1 bg-[var(--kinetic-gold)] text-white text-xs rounded hover:opacity-90 disabled:opacity-50"
+          className="px-2 py-1 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-xs rounded hover:bg-[var(--kinetic-gold-hover)] disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save"}
         </button>

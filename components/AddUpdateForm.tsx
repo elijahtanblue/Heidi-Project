@@ -358,7 +358,7 @@ export default function AddUpdateForm({
           <button
             type="submit"
             disabled={loading}
-            className="px-2 py-1 bg-[var(--kinetic-gold)] text-white text-xs font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
+            className="px-2 py-1 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] text-xs font-medium rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
           >
             {loading ? "Saving..." : "Save Update"}
           </button>
