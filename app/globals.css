@@ -1,10 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --kinetic-gold: #D4A843;
-  --kinetic-gold-hover: #C49733;
-  --kinetic-gold-light: #F5E6C8;
+  --kinetic-maroon: #3D0B1A;
+  --kinetic-maroon-light: #7A1D35;
+  --kinetic-gold: #F2CE3D;
+  --kinetic-gold-hover: #DDB82A;
+  --kinetic-gold-light: #FEF5C3;
   --kinetic-dark: #1a1a1a;
   --kinetic-gray: #6b7280;
-  --kinetic-bg: #f5f5f0;
+  --kinetic-bg: #F7F3EE;
+}
+
+h1, h2 {
+  font-family: var(--font-serif);
+  font-weight: 400;
 }
