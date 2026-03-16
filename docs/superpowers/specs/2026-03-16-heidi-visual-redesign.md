@@ -28,9 +28,16 @@ The redesign adopts Heidi's aesthetic — dark maroon brand colour, vivid yellow
 
 ## 2. Typography
 
-- **Font:** DM Serif Display, loaded via `next/font/google` in `app/layout.tsx`
-- **Application:** CSS variable `--font-serif` exposed on `:root`, applied to all `h1` and `h2` elements via a global rule in `globals.css`
-- **Body text:** Unchanged — system sans-serif for all labels, table content, form text, and paragraphs. High readability for clinical data.
+- **Font:** DM Serif Display, loaded via `next/font/google` in `app/layout.tsx`, variable name `--font-serif`
+- **Application:** Add to `globals.css`:
+  ```css
+  h1, h2 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+  ```
+  DM Serif Display only ships at weight 400. Setting `font-weight: 400` explicitly prevents the browser from synthesizing a faux-bold, which would look degraded. Existing `font-bold` / `font-semibold` Tailwind classes on heading elements must be **removed** — the global rule handles weight.
+- **Body text:** Unchanged — system sans-serif for all labels, table content, form text, and paragraphs.
 
 ---
 
@@ -40,22 +47,33 @@ The redesign adopts Heidi's aesthetic — dark maroon brand colour, vivid yellow
 - Logo mark: gold (`--kinetic-gold`) background, white "K" — unchanged treatment, pops against maroon
 - "Kinetic" wordmark: white text
 - Nav links: `text-white/70` inactive, `text-white` active, active state has `--kinetic-maroon-light` pill background
-- Sign out button: gold background (`--kinetic-gold`), dark text — unchanged treatment
+- Sign out button: gold background (`--kinetic-gold`), **dark text** (`text-[var(--kinetic-dark)]`) — **changed from current `text-white`** (gold at `#F2CE3D` is too bright for white text)
 - Remove `border-b border-gray-200` — dark/cream contrast handles separation naturally
 
 ---
 
 ## 4. Patient Navbar
 
-The patient-facing navbar (rendered on `/patient-dashboard` and `/patient-dashboard/present`) uses an **inverted treatment** to feel warmer and less institutional:
+The patient-facing navbar uses an **inverted treatment** to feel warmer and less institutional:
 
 - Background: `bg-[var(--kinetic-bg)]` (cream) with a bottom border `border-[var(--kinetic-maroon)]/20`
 - Logo mark: gold background, white "K" — same as clinician
 - "Kinetic" wordmark: `--kinetic-maroon` text
 - No nav links (patient has no sub-navigation)
-- Sign out button: `--kinetic-maroon` background, white text
+- Sign out button: `--kinetic-maroon` background, white text — same `signOut` logic as clinician navbar (copy the existing `signOut({ redirect: false })` + `window.location.href` pattern)
 
-> **Implementation note:** The patient pages do not currently use the `Navbar` component. A separate `PatientNavbar` component should be created, or the existing `Navbar` extended with a `variant` prop. Either approach is acceptable; a `variant="patient"` prop on the existing component avoids duplication.
+### Wiring
+
+`app/(routes)/layout.tsx` already reads `user?.role`. Add a `variant` prop to `Navbar` (`"clinician" | "patient"`, defaulting to `"clinician"`):
+
+```tsx
+// In app/(routes)/layout.tsx
+const isPatient = user?.role === "patient";
+// ...
+<Navbar isAdmin={isAdmin} variant={isPatient ? "patient" : "clinician"} />
+```
+
+The `Navbar` component conditionally renders its styling based on `variant`. No separate layout file needed.
 
 ---
 
@@ -66,7 +84,7 @@ The patient-facing navbar (rendered on `/patient-dashboard` and `/patient-dashbo
 - Card: `bg-white rounded-lg shadow-sm` — **remove** `border border-gray-200`, add a `4px` maroon top accent strip (`border-t-4 border-[var(--kinetic-maroon)]`)
 - "Kinetic" heading: DM Serif Display (inherits from global h1 rule)
 - "Sign in to your account" subheading: DM Serif Display (inherits from global h2 rule)
-- Button: updated gold `#F2CE3D`, dark text (gold is too light for white text at this brightness — use `text-[var(--kinetic-dark)]`)
+- Button: `bg-[var(--kinetic-gold)]`, `text-[var(--kinetic-dark)]`, `hover:bg-[var(--kinetic-gold-hover)]` — replace existing `hover:opacity-90` with the hover token for consistency
 - Input focus ring: `focus:ring-[var(--kinetic-gold)]`
 
 > **Important:** At `#F2CE3D`, the gold is too bright for white button text. All gold buttons across the app should use `text-[var(--kinetic-dark)]` rather than `text-white`.
@@ -97,7 +115,7 @@ The patient-facing navbar (rendered on `/patient-dashboard` and `/patient-dashbo
 - Patient name heading (`{patient.firstName} {patient.lastName}`): DM Serif Display at `text-3xl` (larger than current `text-2xl`) — more of a personal greeting than a dashboard title
 - Subtitle: change "Your treatment history" → **"Your care journey"**
 - "Present to Physio" button: updated gold, dark text
-- Empty state card: background `--kinetic-gold-light` (`#FEF5C3`) instead of white — warm and inviting
+- Empty state card: background `bg-[var(--kinetic-gold-light)]` (`#FEF5C3`) instead of white — warm and inviting. **No `shadow-sm`** on this element; the warm background provides sufficient visual distinction without a shadow.
 - Patient navbar: uses inverted variant (see Section 4)
 
 ---
@@ -105,7 +123,7 @@ The patient-facing navbar (rendered on `/patient-dashboard` and `/patient-dashbo
 ## 9. Forms and Components
 
 ### `AddUpdateForm.tsx` and `PatientPresentForm.tsx`
-- Section divider label ("Physiotherapist fills in below"): change text colour from `text-gray-500` to `text-[var(--kinetic-maroon)]`
+- Section divider label — search for the exact string `"Physiotherapist fills in below"` — change its text colour class from `text-gray-500` to `text-[var(--kinetic-maroon)]`
 - All buttons: updated gold, dark text
 - Input focus rings: updated gold
 
@@ -141,6 +159,7 @@ The patient-facing navbar (rendered on `/patient-dashboard` and `/patient-dashbo
 |---|---|
 | `app/globals.css` | New tokens, serif global rule |
 | `app/layout.tsx` | Import DM Serif Display font |
+| `app/(routes)/layout.tsx` | Pass `variant` prop to Navbar based on `user?.role` |
 | `components/Navbar.tsx` | Dark maroon treatment + `variant` prop for patient |
 | `app/login/page.tsx` | Maroon top strip, serif headings, gold button |
 | `app/(routes)/dashboard/page.tsx` | Serif headings, card shadow/no-border, spacing |
