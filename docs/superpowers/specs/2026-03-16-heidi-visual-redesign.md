@@ -81,7 +81,11 @@ const isPatient = user?.role === "patient";
 <Navbar isAdmin={isAdmin} variant={isPatient ? "patient" : "clinician"} />
 ```
 
-The `Navbar` component conditionally renders its styling based on `variant`. No separate layout file needed.
+The `Navbar` component conditionally renders its **styling and structure** based on `variant`:
+- When `variant === "patient"`: suppress the `<nav>` link block entirely (e.g., `{variant !== "patient" && <nav>...</nav>}`). Patients have no sub-navigation.
+- When `variant === "clinician"` (default): render nav links as now.
+
+No separate layout file needed.
 
 > **Note:** `app/(routes)/layout.tsx` relies on the existing auth redirect to guarantee authenticated users reach this layout. `user` may be `undefined` for unauthenticated requests — this is identical to the existing `isAdmin` behaviour and is acceptable for this app.
 
