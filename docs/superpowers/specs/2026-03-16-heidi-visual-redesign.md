@@ -32,7 +32,7 @@ The redesign adopts Heidi's aesthetic — dark maroon brand colour, vivid yellow
 - **DOM application:** The font's `.variable` className must be applied to the `<html>` element in `app/layout.tsx` for the CSS variable to resolve:
   ```tsx
   import { DM_Serif_Display } from "next/font/google";
-  const dmSerif = DM_Serif_Display({ subsets: ["latin"], weight: "400", variable: "--font-serif" });
+  const dmSerif = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], variable: "--font-serif" });
   // In RootLayout:
   <html lang="en" className={dmSerif.variable}>
   ```
@@ -82,6 +82,8 @@ const isPatient = user?.role === "patient";
 ```
 
 The `Navbar` component conditionally renders its styling based on `variant`. No separate layout file needed.
+
+> **Note:** `app/(routes)/layout.tsx` relies on the existing auth redirect to guarantee authenticated users reach this layout. `user` may be `undefined` for unauthenticated requests — this is identical to the existing `isAdmin` behaviour and is acceptable for this app.
 
 ---
 
@@ -180,7 +182,7 @@ Vertical spacing between dashboard sections: increase from `mb-6` to `mb-8` to c
 | `app/(routes)/patient-dashboard/page.tsx` | Larger serif heading, subtitle copy, warm empty state, patient navbar |
 | `app/(routes)/patient-dashboard/present/page.tsx` | Patient navbar |
 | `components/EpisodesSection.tsx` | Card shadow/no-border |
-| `components/AddUpdateForm.tsx` | Maroon divider label, gold button |
+| `components/AddUpdateForm.tsx` | Gold button |
 | `components/PatientPresentForm.tsx` | Maroon divider label, gold button |
 | `components/PatientManagement.tsx` | Card shadow/no-border |
 | `components/PatientSnapshot.tsx` | Card shadow/no-border |
