@@ -29,14 +29,22 @@ The redesign adopts Heidi's aesthetic — dark maroon brand colour, vivid yellow
 ## 2. Typography
 
 - **Font:** DM Serif Display, loaded via `next/font/google` in `app/layout.tsx`, variable name `--font-serif`
-- **Application:** Add to `globals.css`:
+- **DOM application:** The font's `.variable` className must be applied to the `<html>` element in `app/layout.tsx` for the CSS variable to resolve:
+  ```tsx
+  import { DM_Serif_Display } from "next/font/google";
+  const dmSerif = DM_Serif_Display({ subsets: ["latin"], weight: "400", variable: "--font-serif" });
+  // In RootLayout:
+  <html lang="en" className={dmSerif.variable}>
+  ```
+- **Global CSS rule:** Add to `globals.css`:
   ```css
   h1, h2 {
     font-family: var(--font-serif);
     font-weight: 400;
   }
   ```
-  DM Serif Display only ships at weight 400. Setting `font-weight: 400` explicitly prevents the browser from synthesizing a faux-bold, which would look degraded. Existing `font-bold` / `font-semibold` Tailwind classes on heading elements must be **removed** — the global rule handles weight.
+  DM Serif Display only ships at weight 400. Setting `font-weight: 400` explicitly prevents the browser from synthesizing a faux-bold, which would look degraded.
+- **Font weight cleanup:** Search every file listed in Section 12 for `<h1` and `<h2` elements and remove any `font-bold` or `font-semibold` Tailwind classes on those elements. The global CSS rule handles weight. Known instances across: `app/login/page.tsx`, `app/(routes)/dashboard/page.tsx`, `app/(routes)/patient-dashboard/page.tsx`, `app/(routes)/patient-dashboard/present/page.tsx`, `app/(routes)/check-access/page.tsx`.
 - **Body text:** Unchanged — system sans-serif for all labels, table content, form text, and paragraphs.
 
 ---
@@ -60,7 +68,7 @@ The patient-facing navbar uses an **inverted treatment** to feel warmer and less
 - Logo mark: gold background, white "K" — same as clinician
 - "Kinetic" wordmark: `--kinetic-maroon` text
 - No nav links (patient has no sub-navigation)
-- Sign out button: `--kinetic-maroon` background, white text — same `signOut` logic as clinician navbar (copy the existing `signOut({ redirect: false })` + `window.location.href` pattern)
+- Sign out button: `--kinetic-maroon` background, white text — **same `onClick` handler as the clinician variant** (reuse, not duplicate). The `variant` prop only changes styling; the sign-out logic (`signOut({ redirect: false })` + `window.location.href`) is shared.
 
 ### Wiring
 
@@ -93,9 +101,14 @@ The `Navbar` component conditionally renders its styling based on `variant`. No 
 
 ## 6. Cards and Surfaces (global)
 
-- All card containers: remove `border border-gray-200`, replace with `shadow-sm`
-- Table internal row dividers (`border-gray-50`, `border-gray-100`) are **retained** — functional separators for clinical data
-- Vertical spacing between dashboard sections: increase from `mb-6` to `mb-8` to compensate for lost border definition
+A "card container" is any `div` that uses `border border-gray-200` as its outer boundary (i.e., a container that holds content, not a table row divider). For every such element:
+- Remove `border border-gray-200`
+- Add `shadow-sm` (unless the element has special treatment specified in its own section — e.g., the login card gets a maroon top strip per Section 5, and the patient empty-state card gets a warm background per Section 8)
+- The patient dashboard empty-state card (`border border-gray-200 p-8`) should also have its border removed
+
+Table internal row dividers (`border-gray-50`, `border-gray-100`) are **retained** — functional separators for clinical data.
+
+Vertical spacing between dashboard sections: increase from `mb-6` to `mb-8` to compensate for lost border definition.
 
 ---
 
@@ -122,8 +135,9 @@ The `Navbar` component conditionally renders its styling based on `variant`. No 
 
 ## 9. Forms and Components
 
-### `AddUpdateForm.tsx` and `PatientPresentForm.tsx`
+### `PatientPresentForm.tsx`
 - Section divider label — search for the exact string `"Physiotherapist fills in below"` — change its text colour class from `text-gray-500` to `text-[var(--kinetic-maroon)]`
+- (`AddUpdateForm.tsx` does not contain this string — no divider label change needed there)
 - All buttons: updated gold, dark text
 - Input focus rings: updated gold
 
