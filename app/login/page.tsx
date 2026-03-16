@@ -40,7 +40,7 @@ export default function LoginPage() {
             <div className="w-8 h-8 rounded bg-[var(--kinetic-gold)] flex items-center justify-center">
               <span className="text-white font-bold text-sm">K</span>
             </div>
-            <h1 className="text-2xl font-bold text-[var(--kinetic-dark)]">
+            <h1 className="text-2xl text-[var(--kinetic-dark)]">
               Kinetic
             </h1>
           </div>
@@ -50,8 +50,8 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold mb-4 text-[var(--kinetic-dark)]">
+        <div className="bg-white rounded-lg shadow-sm border-t-4 border-[var(--kinetic-maroon)] p-6">
+          <h2 className="text-lg mb-4 text-[var(--kinetic-dark)]">
             Sign in to your account
           </h2>
 
@@ -101,7 +101,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-[var(--kinetic-gold)] text-white font-medium rounded-md text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-2 px-4 bg-[var(--kinetic-gold)] text-[var(--kinetic-dark)] font-medium rounded-md text-sm hover:bg-[var(--kinetic-gold-hover)] transition-colors disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>

@@ -52,14 +52,14 @@ export default async function PatientDashboardPage() {
     <div className="max-w-4xl mx-auto">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--kinetic-dark)]">
+          <h1 className="text-3xl text-[var(--kinetic-dark)]">
             {patient.firstName} {patient.lastName}
           </h1>
-          <p className="text-sm text-[var(--kinetic-gray)] mt-1">Your treatment history</p>
+          <p className="text-sm text-[var(--kinetic-gray)] mt-1">Your care journey</p>
         </div>
         <Link
           href="/patient-dashboard/present"
-          className="px-4 py-2 text-sm font-medium text-white bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
+          className="px-4 py-2 text-sm font-medium text-[var(--kinetic-dark)] bg-[var(--kinetic-gold)] rounded-md hover:bg-[var(--kinetic-gold-hover)] transition-colors"
           data-testid="present-to-physio-btn"
         >
           Present to Physio
@@ -67,7 +67,7 @@ export default async function PatientDashboardPage() {
       </div>
 
       {serializedEpisodes.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+        <div className="bg-[var(--kinetic-gold-light)] rounded-lg p-8 text-center">
           <p className="text-sm text-gray-500">
             No treatment history yet. Present your device to your physiotherapist to get started.
           </p>

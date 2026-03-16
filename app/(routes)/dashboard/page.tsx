@@ -83,7 +83,7 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[var(--kinetic-dark)]">
+          <h1 className="text-xl text-[var(--kinetic-dark)]">
             Shared Patient History
           </h1>
           <p className="text-sm text-[var(--kinetic-gray)] mt-1">
@@ -101,10 +101,10 @@ export default async function DashboardPage() {
         const style = TIER_STYLES[tier];
         const barColor = tier === "full" ? "bg-green-500" : tier === "limited" ? "bg-yellow-500" : tier === "minimal" ? "bg-orange-500" : "bg-red-400";
         return (
-          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6" data-testid="access-progress-card">
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-8" data-testid="access-progress-card">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-[var(--kinetic-dark)]">Your Access Level</h2>
+                <h2 className="text-sm text-[var(--kinetic-dark)]">Your Access Level</h2>
                 <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`} data-testid="tier-label">
                   {style.label}
                 </span>
@@ -122,7 +122,7 @@ export default async function DashboardPage() {
       })()}
 
       {/* Patient Visits Section */}
-      <div className="mb-6">
+      <div className="mb-8">
         <EpisodesSection
           initialEpisodes={serializedEpisodes}
           patients={patients}
@@ -134,9 +134,9 @@ export default async function DashboardPage() {
       </div>
 
       {/* Clinics Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-200">
-          <h2 className="text-sm font-semibold text-[var(--kinetic-dark)]">
+          <h2 className="text-sm text-[var(--kinetic-dark)]">
             Clinics
           </h2>
         </div>
@@ -221,9 +221,9 @@ export default async function DashboardPage() {
       />
 
       {/* Patient Consent */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-8">
           <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-sm font-semibold text-[var(--kinetic-dark)]">
+            <h2 className="text-sm text-[var(--kinetic-dark)]">
               Patient Consent
             </h2>
           </div>
