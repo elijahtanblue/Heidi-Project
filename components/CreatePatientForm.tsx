@@ -10,6 +10,8 @@ export default function CreatePatientForm() {
   const [lastName, setLastName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [medicareNumber, setMedicareNumber] = useState("");
+  const [physicianName, setPhysicianName] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -22,7 +24,14 @@ export default function CreatePatientForm() {
       const res = await fetch("/api/patients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, dateOfBirth, phoneNumber }),
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          dateOfBirth,
+          phoneNumber,
+          medicareNumber: medicareNumber || undefined,
+          physicianName: physicianName || undefined,
+        }),
       });
 
       if (!res.ok) {
@@ -35,6 +44,8 @@ export default function CreatePatientForm() {
       setLastName("");
       setDateOfBirth("");
       setPhoneNumber("");
+      setMedicareNumber("");
+      setPhysicianName("");
       setIsOpen(false);
       router.refresh();
     } catch {
@@ -119,6 +130,34 @@ export default function CreatePatientForm() {
             />
           </div>
         </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="patient-medicare" className="block text-xs font-medium text-[var(--kinetic-gray)] mb-1">
+              Medicare Number
+            </label>
+            <input
+              id="patient-medicare"
+              type="text"
+              value={medicareNumber}
+              onChange={(e) => setMedicareNumber(e.target.value)}
+              placeholder="e.g. 2123456701"
+              className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[var(--kinetic-gold)]"
+            />
+          </div>
+          <div>
+            <label htmlFor="patient-physician" className="block text-xs font-medium text-[var(--kinetic-gray)] mb-1">
+              Physician's Name
+            </label>
+            <input
+              id="patient-physician"
+              type="text"
+              value={physicianName}
+              onChange={(e) => setPhysicianName(e.target.value)}
+              placeholder="e.g. Dr. Sarah Lee"
+              className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[var(--kinetic-gold)]"
+            />
+          </div>
+        </div>
         {error && (
           <p className="text-xs text-red-600" data-testid="patient-form-error">{error}</p>
         )}
@@ -132,7 +171,7 @@ export default function CreatePatientForm() {
           </button>
           <button
             type="button"
-            onClick={() => { setIsOpen(false); setError(""); }}
+            onClick={() => { setIsOpen(false); setError(""); setMedicareNumber(""); setPhysicianName(""); }}
             className="px-3 py-1.5 border border-gray-200 text-sm text-[var(--kinetic-gray)] rounded-md hover:bg-gray-50"
           >
             Cancel

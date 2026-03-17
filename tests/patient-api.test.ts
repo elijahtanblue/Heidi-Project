@@ -123,6 +123,41 @@ describe("POST /api/patients", () => {
       data: expect.objectContaining({ clinicId: "c1" }),
     });
   });
+
+  it("persists medicareNumber and physicianName when provided", async () => {
+    mockPatientFindUnique.mockResolvedValueOnce(null);
+    mockPatientCreate.mockResolvedValueOnce({ id: "p1" });
+
+    await POST(makeReq({
+      ...validBody,
+      medicareNumber: "2123456701",
+      physicianName: "Dr. Sarah Lee",
+    }));
+
+    expect(mockPatientCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        medicareNumber: "2123456701",
+        physicianName: "Dr. Sarah Lee",
+      }),
+    });
+  });
+
+  it("omits medicareNumber and physicianName when empty string", async () => {
+    mockPatientFindUnique.mockResolvedValueOnce(null);
+    mockPatientCreate.mockResolvedValueOnce({ id: "p1" });
+
+    await POST(makeReq({
+      ...validBody,
+      medicareNumber: "",
+      physicianName: "",
+    }));
+
+    expect(mockPatientCreate).toHaveBeenCalledWith({
+      data: expect.not.objectContaining({
+        medicareNumber: expect.anything(),
+      }),
+    });
+  });
 });
 
 // ---- DELETE /api/patients/[id] ----
