@@ -67,6 +67,22 @@ export default function Navbar({ isAdmin = false, variant = "clinician" }: Navba
                 ))}
               </nav>
             )}
+
+            {/* Nav Links — patient only */}
+            {isPatient && (
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/patient-dashboard"
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    pathname === "/patient-dashboard"
+                      ? "text-[var(--kinetic-maroon)] bg-[var(--kinetic-maroon)]/10"
+                      : "text-[var(--kinetic-maroon)]/60 hover:text-[var(--kinetic-maroon)]"
+                  }`}
+                >
+                  My Dashboard
+                </Link>
+              </nav>
+            )}
           </div>
 
           {/* Sign Out */}
