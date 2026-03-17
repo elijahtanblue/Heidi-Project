@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import CreateEpisodeForm from "./CreateEpisodeForm";
 import AddUpdateForm from "./AddUpdateForm";
 import PatientSnapshot from "./PatientSnapshot";
-
-interface Patient {
-  id: string;
-  firstName: string;
-  lastName: string;
-}
 
 interface ClinicalUpdate {
   id: string;
@@ -43,13 +36,11 @@ interface Episode {
 
 interface EpisodesSectionProps {
   initialEpisodes: Episode[];
-  patients: Patient[];
   clinicTier?: string;
 }
 
 export default function EpisodesSection({
   initialEpisodes,
-  patients,
   clinicTier,
 }: EpisodesSectionProps) {
   const router = useRouter();
@@ -57,11 +48,6 @@ export default function EpisodesSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [deleteEpisodeConfirmId, setDeleteEpisodeConfirmId] = useState<string | null>(null);
-
-  function handleEpisodeCreated(episode: { id: string; reason: string; startDate: string }) {
-    refreshEpisodes();
-    void episode;
-  }
 
   async function refreshEpisodes() {
     const res = await fetch("/api/episodes");
@@ -95,7 +81,6 @@ export default function EpisodesSection({
         <h2 className="text-sm text-[var(--kinetic-dark)]">
           Patient Visits
         </h2>
-        <CreateEpisodeForm patients={patients} onCreated={handleEpisodeCreated} />
       </div>
 
       {episodes.length === 0 ? (

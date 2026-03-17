@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Patient {
   id: string;
@@ -10,13 +11,10 @@ interface Patient {
 
 interface CreateEpisodeFormProps {
   patients: Patient[];
-  onCreated: (episode: { id: string; reason: string; startDate: string }) => void;
 }
 
-export default function CreateEpisodeForm({
-  patients,
-  onCreated,
-}: CreateEpisodeFormProps) {
+export default function CreateEpisodeForm({ patients }: CreateEpisodeFormProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [patientId, setPatientId] = useState("");
   const [reason, setReason] = useState("");
@@ -44,8 +42,7 @@ export default function CreateEpisodeForm({
         return;
       }
 
-      const episode = await res.json();
-      onCreated(episode);
+      router.refresh();
       setOpen(false);
       setPatientId("");
       setReason("");

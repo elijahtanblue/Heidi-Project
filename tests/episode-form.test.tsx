@@ -13,6 +13,11 @@ import AddUpdateForm from "@/components/AddUpdateForm";
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
+const mockRefresh = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: mockRefresh }),
+}));
+
 const patients = [
   { id: "p1", firstName: "John", lastName: "Smith" },
   { id: "p2", firstName: "Jane", lastName: "Doe" },
@@ -21,17 +26,16 @@ const patients = [
 describe("CreateEpisodeForm", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    mockRefresh.mockReset();
   });
 
   test("renders the Add Patient Visit button initially", () => {
-    const onCreated = jest.fn();
-    render(<CreateEpisodeForm patients={patients} onCreated={onCreated} />);
+    render(<CreateEpisodeForm patients={patients} />);
     expect(screen.getByText("+ Add Patient Visit")).toBeInTheDocument();
   });
 
   test("shows form fields when button is clicked", () => {
-    const onCreated = jest.fn();
-    render(<CreateEpisodeForm patients={patients} onCreated={onCreated} />);
+    render(<CreateEpisodeForm patients={patients} />);
     fireEvent.click(screen.getByText("+ Add Patient Visit"));
 
     expect(screen.getByLabelText("Patient")).toBeInTheDocument();
@@ -39,14 +43,13 @@ describe("CreateEpisodeForm", () => {
     expect(screen.getByLabelText("Start Date")).toBeInTheDocument();
   });
 
-  test("submits form with valid data and calls onCreated", async () => {
+  test("submits form with valid data and calls router.refresh", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: async () => ({ id: "ep1", reason: "Back pain", startDate: "2026-02-22" }),
     });
 
-    const onCreated = jest.fn();
-    render(<CreateEpisodeForm patients={patients} onCreated={onCreated} />);
+    render(<CreateEpisodeForm patients={patients} />);
     fireEvent.click(screen.getByText("+ Add Patient Visit"));
 
     fireEvent.change(screen.getByLabelText("Patient"), { target: { value: "p1" } });
@@ -60,6 +63,7 @@ describe("CreateEpisodeForm", () => {
       expect(mockFetch).toHaveBeenCalledWith("/api/episodes", expect.objectContaining({
         method: "POST",
       }));
+      expect(mockRefresh).toHaveBeenCalled();
     });
   });
 
@@ -69,8 +73,7 @@ describe("CreateEpisodeForm", () => {
       json: async () => ({ error: "Patient not found" }),
     });
 
-    const onCreated = jest.fn();
-    render(<CreateEpisodeForm patients={patients} onCreated={onCreated} />);
+    render(<CreateEpisodeForm patients={patients} />);
     fireEvent.click(screen.getByText("+ Add Patient Visit"));
 
     fireEvent.change(screen.getByLabelText("Patient"), { target: { value: "p1" } });
