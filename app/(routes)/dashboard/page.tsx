@@ -121,7 +121,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Two-column form row */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-2 gap-4 mb-8 items-start">
         <CreatePatientForm />
         <CreateEpisodeForm patients={patients} />
       </div>
