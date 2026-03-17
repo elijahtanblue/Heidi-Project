@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import Anthropic from "@anthropic-ai/sdk";
 
+const CATEGORY_LABELS: Record<number, string> = {
+  1: "Employed Exercise Therapy",
+  2: "Employed Manual Therapy",
+  3: "Employed Pain Management Strategies",
+  4: "Employed Musculoskeletal Rehabilitation",
+  5: "Employed Sports Physiotherapy",
+  6: "Employed Post-operative Rehabilitation",
+  7: "Employed Neurological Physiotherapy",
+  8: "Employed Cardiorespiratory Physiotherapy",
+  9: "Employed Pelvic Health Physiotherapy",
+  10: "Employed Hydrotherapy",
+  11: "Employed Education and Self-management",
+  12: "Employed Assistive Support",
+};
+
 const CATEGORIES_PROMPT = `1. Exercise therapy: Strengthening exercises, Mobility and flexibility exercises, Stretching, Balance and coordination training, Endurance and conditioning, Postural correction exercises, Functional retraining
 2. Manual therapy: Joint mobilisations, Joint manipulations, Soft tissue massage, Myofascial release, Trigger point therapy, Passive stretching, Manual traction
 3. Pain management treatments: Heat therapy, Ice therapy, TENS or electrical stimulation, Dry needling, Acupuncture, Relaxation and breathing techniques, Graded exposure for pain-related movement fear
@@ -32,28 +47,25 @@ export async function POST(req: NextRequest) {
 
   const message = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 100,
+    max_tokens: 10,
     messages: [
       {
         role: "user",
-        content: `You are a physiotherapy clinical documentation assistant. Rewrite the following treatment description using the most appropriate physiotherapy category from the list below.
-
-The rewritten sentence must:
-- Reference the category name naturally (e.g. "Exercise therapy targeting..." or "Manual therapy to address...")
-- Preserve the clinical meaning of the original
-- Be concise (max 20 words)
-- Not copy the original phrasing verbatim
+        content: `You are a physiotherapy clinical documentation assistant. Classify the following treatment description into the single best-matching category from the list below.
 
 Categories:
 ${CATEGORIES_PROMPT}
 
 Treatment description: "${text}"
 
-Reply with ONLY the rewritten sentence. No explanation, no quotes, no extra punctuation.`,
+Reply with ONLY the category number (1–12). No explanation, no text, just the number.`,
       },
     ],
   });
 
-  const rewritten = (message.content[0] as { type: string; text: string }).text.trim();
+  const raw = (message.content[0] as { type: string; text: string }).text.trim();
+  const num = parseInt(raw, 10);
+  const rewritten = CATEGORY_LABELS[num] ?? CATEGORY_LABELS[1];
+
   return NextResponse.json({ rewritten });
 }
