@@ -6,6 +6,7 @@ import ClinicOptInToggle from "@/components/ClinicOptInToggle";
 import ConsentToggle from "@/components/ConsentToggle";
 import EpisodesSection from "@/components/EpisodesSection";
 import CreatePatientForm from "@/components/CreatePatientForm";
+import CreateEpisodeForm from "@/components/CreateEpisodeForm";
 import PatientManagement from "@/components/PatientManagement";
 
 export const dynamic = "force-dynamic";
@@ -78,58 +79,58 @@ export default async function DashboardPage() {
     })),
   }));
 
+  const myClinic = clinics.find((c) => c.id === clinicId);
+  const tier = myClinic ? determineTier(myClinic.accessPercent) : null;
+  const style = tier ? TIER_STYLES[tier] : null;
+  const barColor = tier === "full" ? "bg-green-500"
+    : tier === "limited" ? "bg-yellow-500"
+    : tier === "minimal" ? "bg-orange-500"
+    : "bg-red-400";
+
   return (
     <div>
-      {/* Header */}
-      <div className="mb-6 flex items-start justify-between">
-        <div>
-          <h1 className="text-xl text-[var(--kinetic-dark)]">
-            Shared Patient History
-          </h1>
-          <p className="text-sm text-[var(--kinetic-gray)] mt-1">
-            Access shared patient history by contributing updates.
+      {/* Access Progress Bar — top of page */}
+      {myClinic && tier && style && (
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-8" data-testid="access-progress-card">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm text-[var(--kinetic-dark)]">Your Access Level</h2>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`} data-testid="tier-label">
+                {style.label}
+              </span>
+            </div>
+            <span className="text-sm font-medium text-[var(--kinetic-dark)]" data-testid="access-percent">{myClinic.accessPercent}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2.5" data-testid="progress-bar">
+            <div className={`${barColor} h-2.5 rounded-full transition-all`} style={{ width: `${myClinic.accessPercent}%` }}></div>
+          </div>
+          <p className="text-xs text-[var(--kinetic-gray)] mt-2">
+            Access decays 1% per day. Earn points by contributing clinical updates.
           </p>
         </div>
-        <CreatePatientForm />
+      )}
+
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-xl text-[var(--kinetic-dark)]">
+          Shared Patient History
+        </h1>
+        <p className="text-sm text-[var(--kinetic-gray)] mt-1">
+          Access shared patient history by contributing updates.
+        </p>
       </div>
 
-      {/* Access Progress Bar */}
-      {(() => {
-        const myClinic = clinics.find((c) => c.id === clinicId);
-        if (!myClinic) return null;
-        const tier = determineTier(myClinic.accessPercent);
-        const style = TIER_STYLES[tier];
-        const barColor = tier === "full" ? "bg-green-500" : tier === "limited" ? "bg-yellow-500" : tier === "minimal" ? "bg-orange-500" : "bg-red-400";
-        return (
-          <div className="bg-white rounded-lg shadow-sm p-4 mb-8" data-testid="access-progress-card">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm text-[var(--kinetic-dark)]">Your Access Level</h2>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`} data-testid="tier-label">
-                  {style.label}
-                </span>
-              </div>
-              <span className="text-sm font-medium text-[var(--kinetic-dark)]" data-testid="access-percent">{myClinic.accessPercent}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2.5" data-testid="progress-bar">
-              <div className={`${barColor} h-2.5 rounded-full transition-all`} style={{ width: `${myClinic.accessPercent}%` }}></div>
-            </div>
-            <p className="text-xs text-[var(--kinetic-gray)] mt-2">
-              Access decays 1% per day. Earn points by contributing clinical updates.
-            </p>
-          </div>
-        );
-      })()}
+      {/* Two-column form row */}
+      <div className="grid grid-cols-2 gap-4 mb-8">
+        <CreatePatientForm />
+        <CreateEpisodeForm patients={patients} />
+      </div>
 
       {/* Patient Visits Section */}
       <div className="mb-8">
         <EpisodesSection
           initialEpisodes={serializedEpisodes}
-          patients={patients}
-          clinicTier={(() => {
-            const myClinic = clinics.find((c) => c.id === clinicId);
-            return myClinic ? determineTier(myClinic.accessPercent) : "inactive";
-          })()}
+          clinicTier={myClinic ? determineTier(myClinic.accessPercent) : "inactive"}
         />
       </div>
 
@@ -156,13 +157,10 @@ export default async function DashboardPage() {
           </thead>
           <tbody>
             {clinics.map((clinic) => {
-              const tier = determineTier(clinic.accessPercent);
-              const style = TIER_STYLES[tier];
+              const clinicTierVal = determineTier(clinic.accessPercent);
+              const clinicStyle = TIER_STYLES[clinicTierVal];
               return (
-                <tr
-                  key={clinic.id}
-                  className="border-b border-gray-50 last:border-b-0"
-                >
+                <tr key={clinic.id} className="border-b border-gray-50 last:border-b-0">
                   <td className="px-4 py-3 text-sm text-[var(--kinetic-dark)]">
                     {clinic.name}
                   </td>
@@ -185,8 +183,8 @@ export default async function DashboardPage() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${style.bg} ${style.text}`}>
-                      {style.label}
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${clinicStyle.bg} ${clinicStyle.text}`}>
+                      {clinicStyle.label}
                     </span>
                     <span className="ml-2 text-xs text-gray-500">
                       {clinic.accessPercent}%
@@ -197,10 +195,7 @@ export default async function DashboardPage() {
             })}
             {clinics.length === 0 && (
               <tr>
-                <td
-                  colSpan={3}
-                  className="px-4 py-6 text-sm text-center text-[var(--kinetic-gray)]"
-                >
+                <td colSpan={3} className="px-4 py-6 text-sm text-center text-[var(--kinetic-gray)]">
                   No clinics found.
                 </td>
               </tr>
@@ -208,6 +203,7 @@ export default async function DashboardPage() {
           </tbody>
         </table>
       </div>
+
       {/* Patient Management */}
       <PatientManagement
         patients={patients.map((p) => ({
@@ -222,40 +218,40 @@ export default async function DashboardPage() {
 
       {/* Patient Consent */}
       <div className="bg-white rounded-lg shadow-sm overflow-hidden mt-8">
-          <div className="px-4 py-3 border-b border-gray-200">
-            <h2 className="text-sm text-[var(--kinetic-dark)]">
-              Patient Consent
-            </h2>
-          </div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100 text-left">
-                <th className="px-4 py-2.5 text-xs font-medium text-[var(--kinetic-gray)] uppercase tracking-wide">
-                  Patient Name
-                </th>
-                <th className="px-4 py-2.5 text-xs font-medium text-[var(--kinetic-gray)] uppercase tracking-wide">
-                  Sharing Status
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {patients.map((patient) => (
-                <tr key={patient.id} className="border-b border-gray-50 last:border-b-0">
-                  <td className="px-4 py-3 text-sm text-[var(--kinetic-dark)]">
-                    {patient.firstName} {patient.lastName}
-                  </td>
-                  <td className="px-4 py-3">
-                    <ConsentToggle
-                      patientId={patient.id}
-                      patientName={`${patient.firstName} ${patient.lastName}`}
-                      initialConsent={patient.consentStatus}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="px-4 py-3 border-b border-gray-200">
+          <h2 className="text-sm text-[var(--kinetic-dark)]">
+            Patient Consent
+          </h2>
         </div>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-100 text-left">
+              <th className="px-4 py-2.5 text-xs font-medium text-[var(--kinetic-gray)] uppercase tracking-wide">
+                Patient Name
+              </th>
+              <th className="px-4 py-2.5 text-xs font-medium text-[var(--kinetic-gray)] uppercase tracking-wide">
+                Sharing Status
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {patients.map((patient) => (
+              <tr key={patient.id} className="border-b border-gray-50 last:border-b-0">
+                <td className="px-4 py-3 text-sm text-[var(--kinetic-dark)]">
+                  {patient.firstName} {patient.lastName}
+                </td>
+                <td className="px-4 py-3">
+                  <ConsentToggle
+                    patientId={patient.id}
+                    patientName={`${patient.firstName} ${patient.lastName}`}
+                    initialConsent={patient.consentStatus}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
