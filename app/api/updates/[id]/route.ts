@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { generateSummary } from "@/domain/services/summarizer";
+import { classifyTreatment } from "@/lib/classify";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +44,16 @@ export async function PATCH(
   const updateData: Record<string, unknown> = {};
 
   // Editable fields
-  const editableStrings = ["painRegion", "diagnosis", "treatmentModalities", "precautions", "responsePattern", "suggestedNextSteps"];
+  const editableStrings = ["painRegion", "diagnosis", "precautions", "responsePattern", "suggestedNextSteps"];
   for (const field of editableStrings) {
     if (field in body) {
       updateData[field] = body[field] ?? null;
     }
+  }
+
+  if ("treatmentModalities" in body) {
+    const raw = (body.treatmentModalities as string) ?? "";
+    updateData.treatmentModalities = classifyTreatment(raw);
   }
 
   if ("redFlags" in body) {

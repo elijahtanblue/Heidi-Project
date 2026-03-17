@@ -10,6 +10,7 @@ import {
 } from "@/domain/policy/access";
 import { awardPoints, REASON_CODES } from "@/domain/services/points";
 import { generateSummary } from "@/domain/services/summarizer";
+import { classifyTreatment } from "@/lib/classify";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     updateType,
     painRegion,
     diagnosis,
-    treatmentModalities: treatmentModalities ?? "",
+    treatmentModalities: classifyTreatment(treatmentModalities ?? ""),
     redFlags: redFlags ?? false,
     notes: notesSummaryValue ?? "",
     notesRaw: notesRawValue || null,
