@@ -33,8 +33,6 @@ export default async function PatientDashboardPage() {
 
   if (!patient) redirect("/login");
 
-  const patients = [{ id: patient.id, firstName: patient.firstName, lastName: patient.lastName }];
-
   // Serialize dates for client component
   const serializedEpisodes = patient.episodes.map((ep) => ({
     ...ep,
@@ -75,7 +73,6 @@ export default async function PatientDashboardPage() {
       ) : (
         <EpisodesSection
           initialEpisodes={serializedEpisodes}
-          patients={patients}
         />
       )}
     </div>
