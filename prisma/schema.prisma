@@ -49,6 +49,8 @@ model Patient {
   dateOfBirth          DateTime
   phoneNumber          String    @unique
   clinicId             String
+  medicareNumber       String?
+  physicianName        String?
   consentStatus        String    @default("SHARE")
   consentUpdatedAt     DateTime?
   treatmentCompletedAt DateTime?

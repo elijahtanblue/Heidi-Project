@@ -20,11 +20,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const { firstName, lastName, dateOfBirth, phoneNumber } = body as {
+  const { firstName, lastName, dateOfBirth, phoneNumber, medicareNumber, physicianName } = body as {
     firstName?: string;
     lastName?: string;
     dateOfBirth?: string;
     phoneNumber?: string;
+    medicareNumber?: string;
+    physicianName?: string;
   };
 
   if (!firstName || !lastName || !dateOfBirth || !phoneNumber) {
@@ -62,6 +64,8 @@ export async function POST(request: Request) {
       dateOfBirth: new Date(dateOfBirth),
       phoneNumber: phoneCleaned,
       clinicId: user.clinicId as string,
+      medicareNumber: medicareNumber || undefined,
+      physicianName: physicianName || undefined,
     },
   });
 
