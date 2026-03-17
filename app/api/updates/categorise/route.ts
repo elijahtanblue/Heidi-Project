@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import Anthropic from "@anthropic-ai/sdk";
 
 const CATEGORY_LABELS: Record<number, string> = {
   1: "Employed Exercise Therapy",
@@ -17,18 +16,129 @@ const CATEGORY_LABELS: Record<number, string> = {
   12: "Employed Assistive Support",
 };
 
-const CATEGORIES_PROMPT = `1. Exercise therapy: Strengthening exercises, Mobility and flexibility exercises, Stretching, Balance and coordination training, Endurance and conditioning, Postural correction exercises, Functional retraining
-2. Manual therapy: Joint mobilisations, Joint manipulations, Soft tissue massage, Myofascial release, Trigger point therapy, Passive stretching, Manual traction
-3. Pain management treatments: Heat therapy, Ice therapy, TENS or electrical stimulation, Dry needling, Acupuncture, Relaxation and breathing techniques, Graded exposure for pain-related movement fear
-4. Musculoskeletal rehabilitation: Injury-specific rehab plans, Tendon loading programs, Return-to-work rehab, Movement retraining, Joint stability programs
-5. Sports physiotherapy treatments: Acute injury management, Strength and conditioning support, Biomechanical assessment, Running gait analysis, Return-to-sport programming, Taping and strapping, Injury prevention programs
-6. Post-operative rehabilitation: Range-of-motion recovery, Swelling reduction, Scar management, Strength rebuilding, Gait retraining, Progressive function restoration
-7. Neurological physiotherapy: Gait training, Balance retraining, Coordination exercises, Functional movement retraining, Neuroplasticity-based rehab, Vestibular rehab for dizziness and vertigo
-8. Cardiorespiratory physiotherapy: Breathing exercises, Airway clearance techniques, Chest physiotherapy, Pulmonary rehabilitation, Exercise tolerance training, Recovery after surgery or illness
-9. Pelvic health physiotherapy: Pelvic floor muscle training, Pregnancy-related treatment, Postpartum rehab, Incontinence treatment, Pelvic pain management, Core and breathing retraining
-10. Hydrotherapy / aquatic physiotherapy: Low-impact strengthening, Joint mobility work, Balance and gait training, Pain-reduced exercise in a pool setting
-11. Education and self-management: Pain education, Activity modification, Ergonomic advice, Posture advice, Home exercise programs, Load management, Injury prevention strategies
-12. Assistive support and external aids: Bracing, Splinting, Crutches or walking aids, Orthotics advice, Taping or kinesiology tape`;
+// Keyword → category number. Checked case-insensitively via substring match.
+const KEYWORD_MAP: Array<[string, number]> = [
+  // 1. Exercise therapy
+  ["strengthening exercise", 1],
+  ["mobility exercise", 1],
+  ["flexibility exercise", 1],
+  ["stretching", 1],
+  ["balance and coordination", 1],
+  ["endurance", 1],
+  ["postural correction", 1],
+  ["functional retraining", 1],
+
+  // 2. Manual therapy
+  ["joint mobilisation", 2],
+  ["joint mobilization", 2],
+  ["joint manipulation", 2],
+  ["soft tissue massage", 2],
+  ["myofascial release", 2],
+  ["trigger point", 2],
+  ["passive stretching", 2],
+  ["manual traction", 2],
+
+  // 3. Pain management
+  ["heat therapy", 3],
+  ["ice therapy", 3],
+  ["tens", 3],
+  ["electrical stimulation", 3],
+  ["dry needling", 3],
+  ["acupuncture", 3],
+  ["relaxation", 3],
+  ["breathing technique", 3],
+  ["graded exposure", 3],
+
+  // 4. Musculoskeletal rehabilitation
+  ["injury-specific rehab", 4],
+  ["tendon loading", 4],
+  ["return-to-work", 4],
+  ["movement retraining", 4],
+  ["joint stability", 4],
+  ["musculoskeletal", 4],
+
+  // 5. Sports physiotherapy
+  ["acute injury", 5],
+  ["strength and conditioning", 5],
+  ["biomechanical assessment", 5],
+  ["running gait", 5],
+  ["return-to-sport", 5],
+  ["taping and strapping", 5],
+  ["injury prevention", 5],
+  ["sports physio", 5],
+
+  // 6. Post-operative rehabilitation
+  ["post-operative", 6],
+  ["postoperative", 6],
+  ["range-of-motion recovery", 6],
+  ["swelling reduction", 6],
+  ["scar management", 6],
+  ["strength rebuilding", 6],
+  ["gait retraining", 6],
+  ["progressive function restoration", 6],
+
+  // 7. Neurological physiotherapy
+  ["gait training", 7],
+  ["balance retraining", 7],
+  ["coordination exercise", 7],
+  ["neuroplasticity", 7],
+  ["vestibular rehab", 7],
+  ["neurological physio", 7],
+
+  // 8. Cardiorespiratory physiotherapy
+  ["breathing exercise", 8],
+  ["airway clearance", 8],
+  ["chest physiotherapy", 8],
+  ["chest physio", 8],
+  ["pulmonary rehabilitation", 8],
+  ["pulmonary rehab", 8],
+  ["exercise tolerance", 8],
+  ["cardiorespiratory", 8],
+
+  // 9. Pelvic health
+  ["pelvic floor", 9],
+  ["pregnancy-related", 9],
+  ["postpartum", 9],
+  ["incontinence", 9],
+  ["pelvic pain", 9],
+  ["pelvic health", 9],
+
+  // 10. Hydrotherapy
+  ["hydrotherapy", 10],
+  ["aquatic physio", 10],
+  ["pool exercise", 10],
+  ["pool setting", 10],
+  ["low-impact strengthening", 10],
+
+  // 11. Education and self-management
+  ["pain education", 11],
+  ["activity modification", 11],
+  ["ergonomic advice", 11],
+  ["posture advice", 11],
+  ["home exercise program", 11],
+  ["load management", 11],
+  ["self-management", 11],
+
+  // 12. Assistive support
+  ["bracing", 12],
+  ["splinting", 12],
+  ["crutches", 12],
+  ["walking aid", 12],
+  ["orthotics", 12],
+  ["kinesiology tape", 12],
+  ["assistive", 12],
+];
+
+function classify(text: string): string {
+  const lower = text.toLowerCase();
+  for (const [keyword, categoryNum] of KEYWORD_MAP) {
+    if (lower.includes(keyword)) {
+      return CATEGORY_LABELS[categoryNum];
+    }
+  }
+  // No match — return free text as-is
+  return text;
+}
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -43,29 +153,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Text too short" }, { status: 400 });
   }
 
-  const client = new Anthropic();
-
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 10,
-    messages: [
-      {
-        role: "user",
-        content: `You are a physiotherapy clinical documentation assistant. Classify the following treatment description into the single best-matching category from the list below.
-
-Categories:
-${CATEGORIES_PROMPT}
-
-Treatment description: "${text}"
-
-Reply with ONLY the category number (1–12). No explanation, no text, just the number.`,
-      },
-    ],
-  });
-
-  const raw = (message.content[0] as { type: string; text: string }).text.trim();
-  const num = parseInt(raw, 10);
-  const rewritten = CATEGORY_LABELS[num] ?? CATEGORY_LABELS[1];
-
+  const rewritten = classify(text);
   return NextResponse.json({ rewritten });
 }
