@@ -11,66 +11,40 @@
 
 The access progress card (`data-testid="access-progress-card"`) currently renders after the header row. It moves to be the **first element** in the dashboard page, rendered before the `<h1>` header. No changes to its content or styling.
 
+The `myClinic` lookup and `tier`/`style`/`barColor` computations are extracted as named variables at the top of the server component function (instead of the current IIFE pattern) so they can be shared between the access bar and `DashboardClientSection` without duplication.
+
 ### 1.2 Two-Column Form Row
 
-Below the header, a `grid grid-cols-2 gap-4 mb-8` row replaces the current top-right positioning of `CreatePatientForm`. It contains:
+Below the header, a `grid grid-cols-2 gap-4 mb-8` row holds both form components side by side:
 
 - **Left column:** `CreatePatientForm` — renders its gold "+ Create New Patient" trigger button by default; clicking expands the New Patient form within the left column.
 - **Right column:** `CreateEpisodeForm` — renders its gold "+ Add Patient Visit" trigger button by default; clicking expands the Add Patient Visit form within the right column.
 
-Both columns are always visible. Each form expands/collapses independently within its own column. The two trigger buttons appear side by side.
+Both columns are always visible. Each form expands/collapses independently. The two trigger buttons appear side by side at rest.
 
 ### 1.3 CreateEpisodeForm Extraction from EpisodesSection
 
-`CreateEpisodeForm` is currently rendered inside `EpisodesSection`. It must be extracted to the dashboard page level so it can participate in the two-column row.
+`CreateEpisodeForm` is currently rendered inside `EpisodesSection`. It is extracted to the dashboard page level so it can participate in the two-column row.
 
-**Change to `EpisodesSection`:**
-- Remove the internal `CreateEpisodeForm` render and the `onCreated` handler
-- The `patients` prop stays (still used for the episode list display)
-- The `initialEpisodes` and `clinicTier` props stay unchanged
-- Add an `onEpisodeCreated` callback prop: `onEpisodeCreated: (episode: SerializedEpisode) => void`
-- EpisodesSection calls this callback when a new episode is created, so the dashboard can add it to the displayed list
+**How episode list updates after creation:**
 
-**Change to dashboard page:**
-- Render `<CreateEpisodeForm patients={patients} onCreated={handleEpisodeCreated} />` in the right column
-- `handleEpisodeCreated` is a client-side state update that adds the new episode to the displayed list (same logic currently inside EpisodesSection)
+`CreateEpisodeForm` will call `router.refresh()` on successful episode creation (same pattern as `CreatePatientForm`). This triggers a Next.js server-side re-fetch and re-render, updating the episode list in `EpisodesSection` without requiring state lifting or callbacks between components. `EpisodesSection` retains its existing internal state management unchanged for all other mutations (delete episode, delete update, add update, edit update).
 
-Wait — `dashboard/page.tsx` is a server component. The episode list and `onCreated` handler are managed client-side inside `EpisodesSection`. The extraction must not break this. The cleanest approach:
+**Changes to `EpisodesSection`:**
+- Remove the `handleEpisodeCreated` callback (the handler that was passed as `onCreated` to `CreateEpisodeForm`) and the `<CreateEpisodeForm>` JSX block — do NOT remove `refreshEpisodes` itself, as it is still used by `handleDeleteUpdate` and the `EditUpdateInline` `onSaved` callback
+- Remove the `patients` prop from `EpisodesSectionProps` and the component signature — it was only used to pass to `CreateEpisodeForm` and is not used anywhere else in the component
+- All other internal state (episodes list, edit forms, delete handlers, `refreshEpisodes` for other mutations) remains unchanged
+- The `initialEpisodes` and `clinicTier` props remain unchanged
 
-- Keep `EpisodesSection` as a client component that manages its own episode list state
-- Lift `CreateEpisodeForm` **out** of the EpisodesSection JSX but keep it communicating via a shared state or callback
-- Concretely: `EpisodesSection` exposes a `renderCreateForm` render-prop, OR the dashboard wraps both in a new `PatientVisitsPanel` client component
+**Changes to `CreateEpisodeForm`:**
+- Add `import { useRouter } from "next/navigation"` and call `router.refresh()` after a successful POST instead of calling `onCreated(episode)` with the new episode object
+- Remove the `onCreated` prop from the component interface
+- The `patients` prop stays (still needed to populate the patient select dropdown)
 
-**Chosen approach:** Create a thin `PatientVisitsPanel` client component that owns the episode list state and renders both `CreateEpisodeForm` and `EpisodesSection` together. This keeps the extraction clean without threading callbacks through the server component.
-
-- `components/PatientVisitsPanel.tsx` (new client component):
-  - Accepts `initialEpisodes`, `patients`, `clinicTier` props (same as current EpisodesSection)
-  - Owns `episodes` state (initialized from `initialEpisodes`)
-  - Renders `<CreateEpisodeForm>` (the trigger button + form) in its own slot, passed UP to the two-column row via a render prop or by restructuring
-
-Actually, the simpler solution: keep both forms in the two-column row on the dashboard, and have `EpisodesSection` receive a shared `episodes` state managed by a parent client component.
-
-**Revised approach (simpler):**
-
-Extract a `DashboardClientSection` client component that:
-- Owns `episodes` state
-- Renders the two-column form row (both CreatePatientForm and CreateEpisodeForm)
-- Renders EpisodesSection below
-
-The server component (`dashboard/page.tsx`) renders:
-1. Access level bar (server-rendered, stays as IIFE)
-2. Header h1 + subtitle
-3. `<DashboardClientSection initialEpisodes={...} patients={...} clinicTier={...} />`
-4. Clinics table
-5. PatientManagement
-6. Patient Consent table
-
-`DashboardClientSection`:
-- `"use client"`
-- Owns `episodes` state
-- Renders grid with `CreatePatientForm` (left) and `CreateEpisodeForm` (right)
-- Renders `<EpisodesSection episodes={episodes} patients={patients} clinicTier={clinicTier} onEpisodeCreated={...} />`
-- `EpisodesSection` is refactored to accept `episodes` as a prop (not `initialEpisodes`) and an `onEpisodeCreated` callback instead of managing its own CreateEpisodeForm
+**Changes to `dashboard/page.tsx`:**
+- Remove `<CreatePatientForm />` from the header flex row (no longer top-right)
+- Render the two-column grid row below the header with `<CreatePatientForm />` (left) and `<CreateEpisodeForm patients={patients} />` (right)
+- `patients` is already fetched in the existing `Promise.all` — no new data fetching needed
 
 ---
 
@@ -91,16 +65,18 @@ Run `npx prisma migrate dev --name add-patient-medicare-physician` to generate a
 
 ### 2.3 API — POST /api/patients
 
-Accept `medicareNumber` and `physicianName` in the request body. Both are optional strings. Pass to `prisma.patient.create`.
+Accept `medicareNumber` and `physicianName` in the request body. Both are optional strings. Pass to `prisma.patient.create`. Treat absent/empty values as `undefined` (not stored as empty string).
 
 ### 2.4 CreatePatientForm
 
-Add two new optional input fields below the existing DOB/Phone row:
+Add two new optional input fields in a new `grid grid-cols-2 gap-3` row below the existing DOB/Phone row:
 
-- **Medicare Number** — text input, optional, `placeholder="e.g. 2123456701"`, no `required` attribute
-- **Physician's Name** — text input, optional, `placeholder="e.g. Dr. Sarah Lee"`, no `required` attribute
+- **Medicare Number** — text input, optional (`required` omitted), `placeholder="e.g. 2123456701"`
+- **Physician's Name** — text input, optional (`required` omitted), `placeholder="e.g. Dr. Sarah Lee"`
 
-Both in a `grid grid-cols-2 gap-3` row. Include in the `fetch` POST body. Reset on successful submit.
+State: `medicareNumber` and `physicianName` string state vars, initialized to `""`.
+
+Include both in the `fetch` POST body (send `undefined` or omit if empty string — use `|| undefined` to avoid storing blanks). Reset both to `""` on successful submit.
 
 ---
 
@@ -111,17 +87,18 @@ Both in a `grid grid-cols-2 gap-3` row. Include in the `fetch` POST body. Reset 
 | `prisma/schema.prisma` | Modify | Add `medicareNumber String?`, `physicianName String?` to Patient |
 | `prisma/migrations/...` | Create | Migration for the two new columns |
 | `app/api/patients/route.ts` | Modify | Accept + persist `medicareNumber`, `physicianName` |
-| `components/CreatePatientForm.tsx` | Modify | Add two optional input fields |
-| `components/DashboardClientSection.tsx` | Create | Client wrapper owning episode state + two-column form row |
-| `components/EpisodesSection.tsx` | Modify | Accept `episodes` prop + `onEpisodeCreated` callback; remove internal CreateEpisodeForm |
-| `app/(routes)/dashboard/page.tsx` | Modify | Move access bar to top, render DashboardClientSection, remove CreatePatientForm from header |
+| `components/CreatePatientForm.tsx` | Modify | Add two optional input fields + state vars |
+| `components/CreateEpisodeForm.tsx` | Modify | Remove `onCreated` prop; call `router.refresh()` on success instead |
+| `components/EpisodesSection.tsx` | Modify | Remove internal CreateEpisodeForm render + `onCreated` handler |
+| `app/(routes)/dashboard/page.tsx` | Modify | Move access bar to top; two-column form row; extract myClinic variable |
 
 ---
 
 ## 4. Tests
 
-- Update `tests/patient-api.test.ts` to include `medicareNumber` and `physicianName` in create-patient tests
-- Update any `EpisodesSection` tests that reference `initialEpisodes` prop or `CreateEpisodeForm` being inside it
+- Update `tests/patient-api.test.ts`: include `medicareNumber` and `physicianName` in create-patient request/response tests
+- Update `tests/patient-ui.test.tsx`: update the POST body assertion in the submit test to include (or use `objectContaining` for) the new optional fields
+- Update `tests/episode-form.test.tsx`: all four tests currently render `<CreateEpisodeForm patients={patients} onCreated={onCreated} />` — after the `onCreated` prop is removed, every `render(...)` call must drop the `onCreated` argument entirely, the `onCreated = jest.fn()` variable must be removed, and the success-path test must instead mock `useRouter` (via `jest.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mockRefresh }) }))`) and assert that `mockRefresh()` was called
 - No routing or access-policy logic changes — those tests are unaffected
 
 ---
